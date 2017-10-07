@@ -32,6 +32,46 @@ class ViewController: UIViewController, XMLParserDelegate, UITableViewDelegate, 
         super.didReceiveMemoryWarning()
     }
     
+    //MARK: BeatingDegree
+    func calculateDegree(ho: Int, vis: Int) -> Double{
+        var difference: Int = 0
+        var degree: Double = 0.0
+        if ho >= vis {
+            difference = ho - vis
+            degree = 0.0338 * Double(difference) - 0.1162
+            return degree
+        }else{
+            difference = vis - ho
+            degree = 0.0338 * Double(difference) - 0.1162
+            return degree
+        }
+    }
+    
+    func calculateBeating(degree: Double) -> String{
+        var type: String = ""
+        
+        if degree > 1.0 {
+            type = "Hanzo Main"
+        } else if degree < 1.0 {
+            type = "Se las metieron"
+            if degree < 0.56 {
+                type = "Paliza"
+                if degree < 0.35 {
+                    type = "Victoria Presumible"
+                    if degree < 0.15 {
+                        type = "Puede Mejorar"
+                        if degree < 0.03 {
+                            type = "Tranqui"
+                        }
+                    }
+                }
+            }
+        }
+        
+        return type
+    }
+    
+    
     //MARK: TableViewDelegate
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -48,7 +88,7 @@ class ViewController: UIViewController, XMLParserDelegate, UITableViewDelegate, 
         cell.visitorLabel.text = visitor[indexPath.row]
         cell.homeScore.text = String(hScore[indexPath.row])
         cell.visitorScore.text = String(vScore[indexPath.row])
-        
+        cell.beatLabel.text = calculateBeating(degree: calculateDegree(ho: hScore[indexPath.row], vis: vScore[indexPath.row]))
         return cell
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -75,8 +115,7 @@ class ViewController: UIViewController, XMLParserDelegate, UITableViewDelegate, 
             print("parse failure!")
         }
     }
-    
-    
+
     func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String]) {
         currentElement=elementName;
         if(elementName=="g")
@@ -89,6 +128,7 @@ class ViewController: UIViewController, XMLParserDelegate, UITableViewDelegate, 
             visitor.append(vnn)
             hScore.append(hs)
             vScore.append(vs)
+            
             if(elementName=="g"){
                 passName=true;
             }
